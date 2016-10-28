@@ -2,12 +2,12 @@ package atree.util;
 
 import java.util.ArrayList;
 
-import atree.treeData.Node;
+import atree.treeData.NodeEARS;
 
 
 public class GrayCell {
 
-	ArrayList<Node> elements;
+	ArrayList<NodeEARS> elements;
 	public static final int MUTATION=1; 
 	public static final int CROSSOVER=2; 
 	public static final int REPAIR=3;
@@ -19,13 +19,13 @@ public class GrayCell {
 	}
 	public void reset() {
 	}
-	public void add(Node n) {
-		if (elements==null) elements = new ArrayList<Node>();
+	public void add(NodeEARS n) {
+		if (elements==null) elements = new ArrayList<NodeEARS>();
 		elements.add(n);
 		
 	}
 	/**
-	 * @param argsê§
+	 * @param argsï¿½
 	 */
 	public static void main(String[] args) {
 

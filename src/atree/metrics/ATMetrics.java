@@ -2,25 +2,25 @@ package atree.metrics;
 
 import java.util.ArrayList;
 
-import atree.treeData.Node;
+import atree.treeData.NodeEARS;
 import atree.util.MeanStDev;
 
 
 public class ATMetrics {
-	private ArrayList<Node> initTrees;
-	private ArrayList<Node> splitTrees; // only tree root nodes
-	private ArrayList<Node> allNodes; 
+	private ArrayList<NodeEARS> initTrees;
+	private ArrayList<NodeEARS> splitTrees; // only tree root nodes
+	private ArrayList<NodeEARS> allNodes; 
 	private double x;
 	private long count;
 	private long differentSolutions;
 
 	
-	public ATMetrics(ArrayList<Node> initTrees, double x) {
+	public ATMetrics(ArrayList<NodeEARS> initTrees, double x) {
 		super();
 		this.initTrees = initTrees;
 		this.x = x;
-		splitTrees = new ArrayList<Node>();
-		allNodes = new ArrayList<Node>();
+		splitTrees = new ArrayList<NodeEARS>();
+		allNodes = new ArrayList<NodeEARS>();
 		count = 0;
 		differentSolutions=0;
 		fillRootLeafsAndCount();
@@ -32,11 +32,11 @@ public class ATMetrics {
      * @param epsilons
      */
 	private void setRevisitedAll(double epsilons[]) {
-		Node tmp, tmp2;
+		NodeEARS tmp, tmp2;
 		int k;
 		int max=allNodes.get(0).chromo.length();
 		String s1; String s2;
-		//ArrayList<Node> allNodesCopy = new ArrayList<Node>(); 
+		//ArrayList<NodeEARS> allNodesCopy = new ArrayList<NodeEARS>(); 
 		for (int i=0; i < allNodes.size(); i++) {
 			tmp = allNodes.get(i);
 			if (!tmp.isRevisited()) {
@@ -73,11 +73,11 @@ public class ATMetrics {
 	}
  
 	private void setRevisitedAll() {
-		Node tmp, tmp2;
+		NodeEARS tmp, tmp2;
 		int k;
 		int max=allNodes.get(0).chromo.length();
 		String s1; String s2;
-		//ArrayList<Node> allNodesCopy = new ArrayList<Node>(); 
+		//ArrayList<NodeEARS> allNodesCopy = new ArrayList<NodeEARS>(); 
 		for (int i=0; i < allNodes.size(); i++) {
 			tmp = allNodes.get(i);
 			if (!tmp.isRevisited()) {
@@ -123,22 +123,22 @@ public class ATMetrics {
 
 	private void fillRootLeafsAndCount() {
 		splitTrees.addAll(initTrees);
-		for (Node n : initTrees) {
+		for (NodeEARS n : initTrees) {
 			count++;
 			allNodes.add(n);
-			for (Node e : n.getChildrens()) {
+			for (NodeEARS e : n.getChildrens()) {
 				recursiveFillRootTopDown(e);
 			}
 		}
 	}
 
-	private void recursiveFillRootTopDown(Node e) {
+	private void recursiveFillRootTopDown(NodeEARS e) {
 		count++;
 		allNodes.add(e);
 		if (e.getX() >= x) {
 			splitTrees.add(e);
 		}
-		for (Node n : e.getChildrens()) {
+		for (NodeEARS n : e.getChildrens()) {
 			recursiveFillRootTopDown(n);
 		}
 	}
@@ -153,9 +153,9 @@ public class ATMetrics {
 	}
 
     // First parent A 
-	private Node getParentATree(Node e) {
+	private NodeEARS getParentATree(NodeEARS e) {
 		if (e.getParent()==null) return null; //first no parent
-		Node p=e.getParent();
+		NodeEARS p=e.getParent();
 		while (p.getX()<=x) {
 			if (p.getParent()==null) return p; //Last is root
 			p=p.getParent();
@@ -163,10 +163,10 @@ public class ATMetrics {
 		return p;	
 	}
     // TreeDepth A 
-	private int getTreeDepth(Node e) {
+	private int getTreeDepth(NodeEARS e) {
 		int i=0;
 		do {
-		  Node t = getParentATree(e);
+		  NodeEARS t = getParentATree(e);
 		  if (t!=null) i++; 
 		  else break;
 		  e=t;
@@ -177,7 +177,7 @@ public class ATMetrics {
 	}
 	public MeanStDev explorGap() {
 	  ArrayList<Double> population = new ArrayList<Double>();
-		for (Node t : splitTrees) {
+		for (NodeEARS t : splitTrees) {
 			if (t.getParent()!=null) {
 				population.add(new Double(t.getIdGen()-getParentATree(t).getIdGen())); 
 			}
@@ -187,7 +187,7 @@ public class ATMetrics {
 
 	public MeanStDev explorProgressiveness() {
 		  ArrayList<Double> population = new ArrayList<Double>();
-			for (Node t : splitTrees) {
+			for (NodeEARS t : splitTrees) {
 				if (t.getParent()!=null) {
 					population.add(new Double(getTreeDepth(t))); 
 				}
@@ -199,7 +199,7 @@ public class ATMetrics {
 	public double explorType(int type) {
 		long countType = 0;
 		long countAllType = 0;
-		for (Node t : splitTrees) {
+		for (NodeEARS t : splitTrees) {
 
 			if (t.getParent() == null) {
 				countAllType++;
@@ -208,56 +208,29 @@ public class ATMetrics {
 				}
 				continue;// skip count for root
 			}
-			if (t.isC()) {
-				countAllType++;
-				if (type == 0) {
-					countType++;
-				}
-			}
-			if (t.isM()) {
-				countAllType++;
-				if (type == 1) {
-					countType++;
-				}
-			}
-			if (t.isR()) {
-				countAllType++;
-				if (type == 2) {
-					countType++;
-				}
-			}
 		}
 		//System.out.println(countType + "/" + countAllType);
 		return Util.divide(countType,countAllType);
 	}
 	
-	private double countExploitType(int type, Node tree) {
+	private double countExploitType(int type, NodeEARS tree) {
 		double countType = 0;
-		if (tree.getX()<x) {
-		for (Node t : tree.getChildrens()) {
-			countType+=countExploitType(type, t);
-		}
-		if (type == 0) if (tree.isC()) countType++;
-		if (type == 1) if (tree.isM()) countType++;
-		if (type == 2) if (tree.isR()) countType++;
-		if (type == 4) if (tree.isClone()) countType++;
-		}
 		return countType;
 	}
     /*
      * Skips root
      */
-    private double countExploitTypeNode(int type, Node tree) {
+    private double countExploitTypeNode(int type, NodeEARS tree) {
     	double sumType=0;
-		for (Node n : tree.getChildrens()) {
+		for (NodeEARS n : tree.getChildrens()) {
     	  sumType +=countExploitType(type,n);
 		}
     	return sumType;
     }
     /*
-     * Average for node
+     * Average for NodeEARS
      */    
-    public double exploitTypeNode(int type, Node n) {
+    public double exploitTypeNode(int type, NodeEARS n) {
     	double summAll=0, sumType=0;
     	summAll=countExploitTypeNode(0,n)+countExploitTypeNode(1,n)+countExploitTypeNode(2,n)+countExploitTypeNode(4,n);
     	sumType +=countExploitTypeNode(type,n);
@@ -265,11 +238,11 @@ public class ATMetrics {
     }
 
     /*
-     * Average for node
+     * Average for NodeEARS
      */    
     public double exploitType(int type) {
     	double summAll=0, sumType=0;
-    	for (Node n:splitTrees) {
+    	for (NodeEARS n:splitTrees) {
     	  summAll+=countExploitTypeNode(0,n)+countExploitTypeNode(1,n)+countExploitTypeNode(2,n)+countExploitTypeNode(4,n);
     	  sumType +=countExploitTypeNode(type,n);
     	}
@@ -277,22 +250,22 @@ public class ATMetrics {
     }
     public double exploitSelectionPressure() {
     	int leafs=0;
-    	for (Node n:splitTrees) {    		
-        	for (Node nn:n.getChildrens()) {
+    	for (NodeEARS n:splitTrees) {    		
+        	for (NodeEARS nn:n.getChildrens()) {
         		leafs+=countLeafs(nn);
         	}
     	}
     	return Util.divide(leafs,count);
     }
 
-	private int countLeafs(Node nn) {
+	private int countLeafs(NodeEARS nn) {
 		if (nn.getX()>=x) return 0;
 		if (nn.getChildrens().size()==0) {
-			return 1; //Node
+			return 1; //NodeEARS
 		}
 		int leafs=0;
 		boolean l=true; //one chiled is not leaf then it is not leaf 
-       	for (Node n:nn.getChildrens()) {
+       	for (NodeEARS n:nn.getChildrens()) {
            	if (nn.getX()<x) {
            		l=false;
         		leafs+=countLeafs(n);
@@ -302,7 +275,7 @@ public class ATMetrics {
 		return leafs;
 	}
     
-	private int firstExploreParent(Node n) {
+	private int firstExploreParent(NodeEARS n) {
 		int i=1;
 		while (n.getParent()!=null) {
 			n=n.getParent();
@@ -315,7 +288,7 @@ public class ATMetrics {
 	}
 	public MeanStDev exploitProgressiveness() {
 		  ArrayList<Double> population = new ArrayList<Double>();
-			for (Node t : allNodes) {
+			for (NodeEARS t : allNodes) {
 				if (t.getX()<x) { //explore condition
 					population.add(new Double(firstExploreParent(t))); //TODO Very slow...
 				}
@@ -325,10 +298,10 @@ public class ATMetrics {
 	}
 
 	/*
-	 * if node nn has explore successor than it is not leaf 
+	 * if NodeEARS nn has explore successor than it is not leaf 
 	 */
-	private boolean isExploreLeaf(Node nn) {
-		for (Node n:nn.getChildrens()) {
+	private boolean isExploreLeaf(NodeEARS nn) {
+		for (NodeEARS n:nn.getChildrens()) {
            	if (n.getX()>=x) { //explore condition
            		return false; //has explore leaf
            	} else {
@@ -340,7 +313,7 @@ public class ATMetrics {
 	//Number of leafs in explore tree
 	public double exploreSelectionPressure() {
     	int leafs=0;
-    	for (Node n:splitTrees) { 
+    	for (NodeEARS n:splitTrees) { 
     		//
     		if (isExploreLeaf(n)) {
         		leafs++;
@@ -353,7 +326,7 @@ public class ATMetrics {
 	public double bestFitness()
 	{
 		double bestFit = Double.MAX_VALUE;
-		for (Node n:allNodes)
+		for (NodeEARS n:allNodes)
 		{
 			double fit = Math.abs(n.getFit());
 

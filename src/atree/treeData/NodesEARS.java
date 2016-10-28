@@ -14,7 +14,7 @@ public class NodesEARS {
 	public static final int SCENARIO_NORMAL = 0;
 	public static final int SCENARIO_OPTIMISTIC = 1;
 	public static final int SCENARIO_SEMI_OPTIMISTIC = 2;
-	public Hashtable<String, NodeEARS> getAllNodeEARSs() {
+	public Hashtable<String, NodeEARS> getAllNodesEARS() {
 		return ht;
 	}
 	public boolean containsKey(Object key) {
@@ -51,107 +51,6 @@ public class NodesEARS {
 		paretoList = new ArrayList<NodeEARS>();
 	}
 
-	public void createAllBarbara(String file) {
-		createAllBarbara(file, Integer.MAX_VALUE);
-	}
-
-	/*
-	 * Example
-	 * 
-	 * 10 5 10
-	 * 
-	 * Generacija �t: 1 Navadna populacija: (-1,-1)(-1,-1)(0,0) 0101110001 0 0 1
-	 * 2 (-1,-1)(-1,-1)(1,0) 0001110100 0 0 0 0 (-1,-1)(-1,-1)(2,0) 0000110111 0
-	 * 0 1 2 (-1,-1)(-1,-1)(3,0) 0110000010 0 0 1 1 (-1,-1)(-1,-1)(4,0)
-	 * 0100100110 0 0 1 2 (-1,-1)(-1,-1)(5,0) 0000111010 0 0 0 0
-	 * (-1,-1)(-1,-1)(6,0) 1001000000 0 0 0 0 (-1,-1)(-1,-1)(7,0) 0000101110 0 0
-	 * 0 0 (-1,-1)(-1,-1)(8,0) 1000110100 0 0 0 0 (-1,-1)(-1,-1)(9,0) 0100000011
-	 * 0 0 1 1
-	 * 
-	 * Generacija �t: 2 ...
-	 */
-
-	public void createAllBarbara(String file, int maxgen) {
-		FileReader fr;
-		try {
-			fr = new FileReader(file);
-			BufferedReader br = new BufferedReader(fr);
-			String s;
-			s = br.readLine();
-			int popsize = Integer.parseInt(s);
-			s = br.readLine();
-			int gen = Integer.parseInt(s);
-			if (maxgen < gen)
-				gen = maxgen;
-			s = br.readLine();
-			int problemSize = Integer.parseInt(s);
-			for (int i = 0; i <= gen; i++) {
-				s = br.readLine(); // prazna
-				s = br.readLine(); // Generacija �t: 1
-				s = br.readLine(); // Navadna populacija:
-				for (int j = 0; j < popsize; j++) {
-					put(NodeEARS.convertBarbaraFormat(br.readLine(), this));
-
-				}
-
-			}
-			fr.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	/*
-	 * Rezultati za problem E:/Diploma/Diploma/knapsack_10_2.txt
-	 * 
-	 * PARAMTERI: Verjetnost mutacije: 0.01 Verjetnost kri�anja: 0.8 Velikost
-	 * turnirja: 2 K vrednost (izr. po ena�bi): 4 Velikost populacije: 10
-	 * Velikost arhiva: 10 �tevilo generacij: 1000 �tevilo ovrednotenj: 20010
-	 * 
-	 * REZULTATI (podrobno): 1. Vrednosti: 360.0 370.0 Teze: 283.0 291.0 Bitni
-	 * niz: 0000110111 Fitnes: 0.021771425375377775 (Stars1),(Stars2):
-	 * (-1,-1)(-1,-1) (ID):(2,0)
-	 * 
-	 * 2....
-	 * 
-	 * Zanima nas samo (ID):(2,0)
-	 */
-	public void setAllBarbaraPareto(String file) {
-		FileReader fr;
-		try {
-			fr = new FileReader(file);
-			BufferedReader br = new BufferedReader(fr);
-			String s;
-			String stepOne[];
-			while ((s = br.readLine()) != null) {
-				if (s.indexOf("(ID):") > -1) { // (ID):(2,0)
-					s = s.replaceAll("\\(ID\\):", "");
-					s = s.replaceAll("\\(", "");
-					s = s.replaceAll("\\)", "");
-					stepOne = s.split(",");
-					String key = "(" + stepOne[1].trim() + "," + stepOne[0].trim() + ")";
-					NodeEARS n = ht.get(key);
-					if (n != null) {
-						n.setPareto(true);
-						this.paretoList.add(n);
-					} else {
-						System.out.println("Cant find:" + s);
-					}
-				}
-			}
-			fr.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 	/*
 	 * Only pareto parents and pareto inniduals survy 
 	 */
@@ -228,17 +127,15 @@ public class NodesEARS {
 		return s;
 	}
 	/**
-	 * ECJ format
-	 * Generation: 0
-	 * p1(-1,-1) p2(-1,-1) id(0,0) in( 1 1 0 0 0 1 0 0 0 0) c0 m0 r0
-	 * p1(-1,-1) p2(-1,-1) id(1,0) in( 1 0 0 0 1 0 1 1 1 1) c0 m0 r0
+	 * EARS format
+	 * id;fitness;chromo[,,,];parents[,,,]
 	 * ...
 	 *  
 	 * @param file
 	 * @param maxgen
 	 * @param useMaxGen calculate statistic for only first maxgen
 	 */
-	public void createAll_ECJ(String file, int maxgen, double epsilon[], boolean useMaxGen) {
+	public void createAll_EARS(String file, int maxgen, double epsilon[], boolean useMaxGen) {
 		FileReader fr;
 		int currGen=0;
 		try {
@@ -246,15 +143,8 @@ public class NodesEARS {
 			BufferedReader br = new BufferedReader(fr);
 			String s;
 			while(null != (s = br.readLine())) {
-				if (s.contains("Generation:")) {
-					s=s.replaceFirst("Generation:", "");
-					currGen = Integer.parseInt(s.trim());
-					//System.out.println("Generation:"+currGen);
-				}
-				if (useMaxGen && (currGen > maxgen)) return;
-				if (s.contains("id(")) { //new individual create NodeEARS
-					put(NodeEARS.convert4String(s, this,epsilon));	
-				}
+				//new individual create NodeEARS
+				put(NodeEARS.convert4String(s, this, epsilon));	
 				
 			}
 			fr.close();
@@ -268,10 +158,8 @@ public class NodesEARS {
 	}
 	
 	/**
-	 * ECJ format
-	 * Generation: 0
-	 * p1(-1,-1) p2(-1,-1) id(0,0) in( 1 1 0 0 0 1 0 0 0 0) c0 m0 r0
-	 * p1(-1,-1) p2(-1,-1) id(1,0) in( 1 0 0 0 1 0 1 1 1 1) c0 m0 r0
+	 * EARS format
+	 * id;fitness;chromo[,,,];parents[,,,]
 	 * 
 	 * Calculates the EE statistics with sum of diff on dimensions
 	 *  
@@ -279,7 +167,7 @@ public class NodesEARS {
 	 * @param maxgen
 	 * @param useMaxGen calculate statistic for only first maxgen
 	 */
-	public void createAll_ECJ(String file, int maxgen, double epsilon, boolean useMaxGen) 
+	public void createAll_EARS(String file, int maxgen, double epsilon, boolean useMaxGen) 
 	{
 		FileReader fr;
 		int currGen=0;
@@ -289,19 +177,7 @@ public class NodesEARS {
 			String s;
 			while(null != (s = br.readLine())) 
 			{
-				if (s.contains("Generation:"))
-				{
-					s=s.replaceFirst("Generation:", "");
-					currGen = Integer.parseInt(s.trim());
-					//System.out.println("Generation:"+currGen);
-				}
-				
-				if (useMaxGen && (currGen > maxgen)) return;
-				
-				if (s.contains("id(")) { //new individual create NodeEARS
-					put(NodeEARS.convert4String(s, this,epsilon));	
-				}
-				
+				put(NodeEARS.convert4String(s, this, epsilon));
 			}
 			fr.close();
 		} catch (FileNotFoundException e) 

@@ -3,8 +3,8 @@ package atree.util;
 import java.util.Collection;
 import java.util.HashMap;
 
-import atree.treeData.Node;
-import atree.treeData.Nodes;
+import atree.treeData.NodeEARS;
+import atree.treeData.NodesEARS;
 
 
 public class GrayMetrics {
@@ -38,7 +38,7 @@ public class GrayMetrics {
 		monotoneGray = GrayTestMz.monotonic_gray(size / 2);
 	}
 
-	public void add(Node n) {
+	public void add(NodeEARS n) {
 		MyPoint m = MonotoneGrayCode.getPos(n.getChromo(), monotoneGray);
 		metrix[m.getX()][m.getY()].add(n);
 	}
@@ -78,7 +78,7 @@ public class GrayMetrics {
 				if (metrix[i][j].elements == null)
 					continue;
 				len = 0;
-				for (Node n : metrix[i][j].elements) {
+				for (NodeEARS n : metrix[i][j].elements) {
 					if (type == 1)
 						len++; // all
 					if (type == 2) {

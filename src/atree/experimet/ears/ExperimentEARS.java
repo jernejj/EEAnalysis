@@ -1,4 +1,4 @@
-package atree.experimet.ecj;
+package atree.experimet.ears;
 
 import java.util.ArrayList;
 
@@ -7,22 +7,21 @@ import atree.metrics.PrintAMetrics;
 import atree.metrics.PrintStatATMetrics;
 import atree.metrics.StatATMetrics;
 import atree.treeData.NodesEARS;
-import atree.util.Util;
 
 
-public class ExperimentECJ_PSO {
+public class ExperimentEARS {
 	//RastriginEEstatPSO_a1.stat
 	//SpherePSOOut_a1.STAT
-	public static String dir = "test_cases/ecj/pso/"; // on mac linux "/"
-	public static String problem_1 = "SchwefeEEstat_a";
+	public static String dir = "test_cases/ears/"; // on mac linux "/"
+	public static String problem_1 = "DESphere";
 	//public static String problem_2 = "SphereEEstatPSO_a";
-	public static String analiza = "a";
+	public static String analiza = "";
 
 
 	public static String[] mixrun;
 	public static int[] mixrunID;
 	public static int[] printrunID; //latex column name
-	public static double epsilon[];
+	public static double epsilon;
 	public static String problemFiles[];
 	
 	public static void setArrays(String subdir, int i) {
@@ -43,11 +42,11 @@ public class ExperimentECJ_PSO {
 		PrintAMetrics pm=null;
 		String problem2;
 		StatATMetrics sam=new StatATMetrics();
-		int maxgeneration=10;
+		int maxgeneration=10000;
 		//long start = System.currentTimeMillis();
 		// ---------------------------------------------------------
 		for (int id = 1; id < (number_of_repetition+1); id++) {
-			problem2 = dir + fileName + id + ".stat";
+			problem2 = dir + fileName + id + ".csv";
 			System.out.println(problem2);
 			n = new NodesEARS();
 			n.createAll_EARS(problem2, maxgeneration, epsilon, false);
@@ -94,10 +93,9 @@ public class ExperimentECJ_PSO {
 	 */
 	public static void main(String[] args) {
 		setArrays(dir, 1);
-		int problemDimension = 20;
-		epsilon = Util.generateEpsilonVector(problemDimension, 10); //for binary vector is any value less than 1 ok!
-		int number_of_test_repetition =9;
-		int x=5; //X dimension-s is/are changed by epsilon
+		epsilon = 0.01; //for binary vector is any value less than 1 ok!
+		int number_of_test_repetition =1;
+		int x=1; //X dimension-s is/are changed by epsilon
 		problemFiles = new String[1];
 		problemFiles[0] = problem_1;
 		//problemFiles[1] = problem_2;

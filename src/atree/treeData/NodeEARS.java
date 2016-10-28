@@ -1,6 +1,7 @@
 package atree.treeData;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import atree.util.LineParserECJ;
 
@@ -34,6 +35,7 @@ public class NodeEARS implements Comparable<NodeEARS> {
 	public NodeEARS() {
 		super();
 		childrens = new ArrayList<NodeEARS>();
+		chromo = new String();
 		revisits = 0;
 		parent = null;
 		pareto = false;
@@ -85,7 +87,15 @@ public class NodeEARS implements Comparable<NodeEARS> {
 		return chromo;
 	}
 	public void setChromo(String chromo) {
-		this.chromo = chromo;
+		
+		if(this.chromo.isEmpty())
+		{
+			this.chromo += chromo;
+		}
+		else
+		{
+			this.chromo += " " + chromo;
+		}
 		ones1=0; //just for fast compare!!!
 		ones2=0;		
 		ones3=0;
@@ -146,48 +156,24 @@ public class NodeEARS implements Comparable<NodeEARS> {
 		return t;
 	}
 	
-	//Example: (-1,-1)(-1,-1)(5,0) 0000111010 0 0 0 0
-	public static NodeEARS convertBarbaraFormat(String line, NodesEARS all) {
-		String stepOne[] = line.split(" ");
-		stepOne[0] = stepOne[0].replaceAll("\\(", "");
-		String stepTwo[] = stepOne[0].trim().split("\\)");
-		NodeEARS r = new NodeEARS();
-		String stepThree[] = stepTwo[2].trim().split(",");
-		r.setIdGen(Long.parseLong(stepThree[1]));
-		r.setChromo(stepOne[1].trim());
-		r.setX(Long.parseLong(stepOne[5].trim()));
-		//set parent
-		stepThree = stepTwo[0].trim().split(",");
-		String key= "("+stepThree[1]+","+stepThree[0]+")";
-		if (all.containsKey(key)) r.setParent(all.get(key));
-		return r;
-	}
-	
 	
 	public static NodeEARS convert4String(String line, NodesEARS all, double epsilon) 
 	{
-		LineParserECJ lp = new LineParserECJ(line);
+		LineParserECJ lp = new LineParserECJ(line, ";");
 		NodeEARS r = new NodeEARS();
-		NodeEARS p1,p2;
-		p1=null;
-		p2=null;
-		String id[];
+		ArrayList <NodeEARS> p = new ArrayList<NodeEARS>();
+		String id;
 		String key;
 		while (lp.getState()!=LineParserECJ.EOF) {
 			switch (lp.getState()) {
 			case LineParserECJ.ID:
-				id = lp.getValues(",");
-				r.setIdGen(Long.parseLong(id[0]));
+				id = lp.getValue();
+				r.setIdGen(Long.parseLong(id));
 				break;
-			case LineParserECJ.P1:
-				id = lp.getValues(",");
-				key= "("+id[1]+","+id[0]+")";
-				if (all.containsKey(key)) p1=all.get(key);
-				break;
-			case LineParserECJ.P2:
-				id = lp.getValues(",");
-				key= "("+id[1]+","+id[0]+")";
-				if (all.containsKey(key)) p2=all.get(key);
+			case LineParserECJ.P:
+				id = lp.getValue().trim();
+				key= "("+id+")";
+				if (all.containsKey(key)) p.add(all.get(key));
 				break;
 			case LineParserECJ.IN:
 				r.setChromo(lp.getValue().trim());
@@ -198,48 +184,47 @@ public class NodeEARS implements Comparable<NodeEARS> {
 			}
 			lp.nextState();
 		}
-
-		double x_p1 = calcX(r, p1, epsilon);
-		double x_p2 = calcX(r, p2, epsilon);
-		if (x_p2<x_p1) { //most equal is parant2
-			r.setParent(p2);
-			r.setX(x_p2);
-		} else {
-			r.setParent(p1);
-			r.setX(x_p1);	
+		
+		//find most similar parent
+		NodeEARS parent = r;
+		double parentX = Double.MAX_VALUE;
+		for(NodeEARS n:p)
+		{
+			double x = calcX(r, n, epsilon);
+			if(x < parentX)
+			{
+				parent = n;
+				parentX = x;
+			}
 		}
 		
-		//if (r.isRnd()) {
-		//	System.out.println(line);
-		//}
+		if(!p.isEmpty())
+		{
+			r.setParent(parent);
+			r.setX(parentX);
+		}
+		
 		return r;
 	}
 	
-	//Example: p1(-1,-1) p2(-1,-1) id(1,0) in( 1 0 0 0 1 0 1 1 1 1) c0 m0 r0
+	//Example: id;fitness;chromo[,,,];parents[,,,]
 	public static NodeEARS convert4String(String line, NodesEARS all, double epsilon[]) 
 	{
-		LineParserECJ lp = new LineParserECJ(line);
+		LineParserECJ lp = new LineParserECJ(line, ";");
 		NodeEARS r = new NodeEARS();
-		NodeEARS p1,p2;
-		p1=null;
-		p2=null;
-		String id[];
+		ArrayList <NodeEARS> p = new ArrayList<NodeEARS>();
+		String id;
 		String key;
 		while (lp.getState()!=LineParserECJ.EOF) {
 			switch (lp.getState()) {
 			case LineParserECJ.ID:
-				id = lp.getValues(",");
-				r.setIdGen(Long.parseLong(id[1]));
+				id = lp.getValue();
+				r.setIdGen(Long.parseLong(id));
 				break;
-			case LineParserECJ.P1:
-				id = lp.getValues(",");
-				key= "("+id[1]+","+id[0]+")";
-				if (all.containsKey(key)) p1=all.get(key);
-				break;
-			case LineParserECJ.P2:
-				id = lp.getValues(",");
-				key= "("+id[1]+","+id[0]+")";
-				if (all.containsKey(key)) p2=all.get(key);
+			case LineParserECJ.P:
+				id = lp.getValue();
+				key= "("+id+")";
+				if (all.containsKey(key)) p.add(all.get(key));
 				break;
 			case LineParserECJ.IN:
 				r.setChromo(lp.getValue().trim());
@@ -251,21 +236,26 @@ public class NodeEARS implements Comparable<NodeEARS> {
 			lp.nextState();
 		}
 
-		double x_p1 = calcX(r, p1, epsilon);
-		double x_p2 = calcX(r, p2, epsilon);
-		if (x_p2<x_p1) { //most equal is parant2
-			r.setParent(p2);
-			r.setX(x_p2);
-		} else {
-			r.setParent(p1);
-			r.setX(x_p1);	
+		//find most similar parent
+		NodeEARS parent = r;
+		double parentX = Double.MAX_VALUE;
+		for(NodeEARS n:p)
+		{
+			double x = calcX(r, n, epsilon);
+			if(x < parentX)
+			{
+				parent = n;
+				parentX = x;
+			}
 		}
 		
-		//if (r.isRnd()) {
-		//	System.out.println(line);
-		//}
+		r.setParent(parent);
+		r.setX(parentX);
+		
 		return r;
 	}
+	
+
 	
 	private static double calcX(NodeEARS r, NodeEARS p, double[] epsilon) {
 		if (p==null) return Integer.MAX_VALUE;

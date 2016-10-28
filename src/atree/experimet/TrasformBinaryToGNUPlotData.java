@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import atree.treeData.Node;
+import atree.treeData.NodeEARS;
 import atree.util.GrayMetrics;
 
 
@@ -19,10 +19,10 @@ public class TrasformBinaryToGNUPlotData {
 		//preberem prvo vrstico
 		String vrstica="";
 	    vrstica=br.readLine();
-	    Node n;
+	    NodeEARS n;
 		while(vrstica != null)
     	{
-			n=new Node(0,0,vrstica.trim(),false,false, false,0);
+			n=new NodeEARS(0,vrstica.trim(),0);
 			vrstica=br.readLine();
 			gm.add(n);
     	}
@@ -40,10 +40,10 @@ public class TrasformBinaryToGNUPlotData {
 		//preberem prvo vrstico
 		String vrstica="";
 	    vrstica=br.readLine();
-	    Node n;
+	    NodeEARS n;
 		while(vrstica != null)
     	{
-			n=new Node(0,0,vrstica.trim(),false,false, false,0);
+			n=new NodeEARS(0,vrstica.trim(),0);
 			vrstica=br.readLine();
 			gm.add(n);
     	}

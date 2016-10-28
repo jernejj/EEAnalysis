@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-import atree.treeData.Node;
-
 
 public class IndividualList {
 	private ArrayList<Individual> list;
@@ -48,9 +46,9 @@ public class IndividualList {
 	/*
 	 * Rezultati za problem E:/Diploma/Diploma/knapsack_10_2.txt
 	 * 
-	 * PARAMTERI: Verjetnost mutacije: 0.01 Verjetnost križanja: 0.8 Velikost
-	 * turnirja: 2 K vrednost (izr. po enaèbi): 4 Velikost populacije: 10
-	 * Velikost arhiva: 10 Število generacij: 1000 Število ovrednotenj: 20010
+	 * PARAMTERI: Verjetnost mutacije: 0.01 Verjetnost kriï¿½anja: 0.8 Velikost
+	 * turnirja: 2 K vrednost (izr. po enaï¿½bi): 4 Velikost populacije: 10
+	 * Velikost arhiva: 10 ï¿½tevilo generacij: 1000 ï¿½tevilo ovrednotenj: 20010
 	 * 
 	 * REZULTATI (podrobno): 1. Vrednosti: 360.0 370.0 Teze: 283.0 291.0 Bitni
 	 * niz: 0000110111 Fitnes: 0.021771425375377775 (Stars1),(Stars2):
